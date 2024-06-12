@@ -1,0 +1,19 @@
+# Use the official AWS Lambda Python image
+FROM public.ecr.aws/lambda/python:3.9
+
+# Copy function code and image
+COPY inference.py ${LAMBDA_TASK_ROOT}
+
+# Install necessary packages
+RUN pip install --upgrade pip
+RUN pip install google-cloud-vision
+RUN pip install pillow boto3
+
+# Set environment variable for Google Cloud credentials
+ENV GOOGLE_APPLICATION_CREDENTIALS="/var/task/servicekey.json"
+
+# Copy the Google Cloud credentials file to the image
+COPY servicekey.json /var/task/servicekey.json
+
+# Command to run the Lambda function
+CMD ["inference.handler"]
