@@ -1,0 +1,32 @@
+# Use the official AWS Lambda Python 3.9 base image
+FROM public.ecr.aws/lambda/python:3.9
+
+# Install system dependencies using yum
+RUN yum install -y \
+    gcc \
+    python3-devel \
+    mesa-libGL \
+    && yum clean all
+
+# Set environment variables
+ENV MPLCONFIGDIR=/tmp/matplotlib
+ENV YOLO_CONFIG_DIR=/tmp/ultralytics
+ENV NUMBA_CACHE_DIR=/tmp/numba_cache
+ENV U2NET_HOME=/tmp/u2net
+
+# Create necessary directories
+RUN mkdir -p /tmp/matplotlib /tmp/ultralytics /tmp/numba_cache /tmp/u2net
+
+# Copy requirements.txt and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt \
+    && rm -rf /root/.cache/pip
+
+# Copy the application code and model files
+COPY detectpill.py ${LAMBDA_TASK_ROOT}/detectpill.py
+COPY best.pt ${LAMBDA_TASK_ROOT}/best.pt
+COPY pills_image_vector.csv ${LAMBDA_TASK_ROOT}/pills_image_vector.csv
+COPY VGG19.h5 ${LAMBDA_TASK_ROOT}/VGG19.h5
+
+# Set the CMD to your handler
+CMD ["detectpill.handler"]
