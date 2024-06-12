@@ -1,0 +1,13 @@
+FROM amazon/aws-lambda-python:3.9
+
+RUN /var/lang/bin/python3.9 -m pip install --upgrade pip
+
+WORKDIR /var/task
+
+COPY inference.py . 
+COPY requirements.txt .
+COPY Best_Model Best_Model
+
+RUN pip install -r requirements.txt
+
+CMD ["inference.handler"]
